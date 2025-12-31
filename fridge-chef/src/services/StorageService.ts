@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Recipe } from '@/types';
+import { FridgeItem } from '@/types/fridge.types';
 import { STORAGE_KEYS } from '@/constants/config';
 
 export interface UserSettings {
@@ -110,6 +111,38 @@ export class StorageService {
   }
 
   /**
+   * Gets fridge items
+   */
+  static async getFridgeItems(): Promise<FridgeItem[]> {
+    try {
+      const itemsJson = await AsyncStorage.getItem(STORAGE_KEYS.FRIDGE_ITEMS);
+      if (!itemsJson) return [];
+
+      const items = JSON.parse(itemsJson);
+      return items.map((item: any) => ({
+        ...item,
+        addedAt: new Date(item.addedAt),
+        lastUsedAt: item.lastUsedAt ? new Date(item.lastUsedAt) : undefined,
+        expiresAt: item.expiresAt ? new Date(item.expiresAt) : undefined,
+      }));
+    } catch (error) {
+      console.error('Failed to load fridge items:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Saves fridge items
+   */
+  static async saveFridgeItems(items: FridgeItem[]): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.FRIDGE_ITEMS, JSON.stringify(items));
+    } catch (error) {
+      throw new Error(`Failed to save fridge items: ${error}`);
+    }
+  }
+
+  /**
    * Clears all data
    */
   static async clearAll(): Promise<void> {
@@ -118,6 +151,7 @@ export class StorageService {
         STORAGE_KEYS.RECIPES,
         STORAGE_KEYS.SETTINGS,
         STORAGE_KEYS.SCAN_HISTORY,
+        STORAGE_KEYS.FRIDGE_ITEMS,
       ]);
     } catch (error) {
       throw new Error(`Failed to clear storage: ${error}`);

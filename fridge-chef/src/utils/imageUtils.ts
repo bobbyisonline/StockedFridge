@@ -38,7 +38,7 @@ export async function compressImage(
     // Get file size
     let size = 0;
     try {
-      const fileInfo = await FileSystem.getInfoAsync(manipResult.uri, { size: true });
+      const fileInfo = await FileSystem.getInfoAsync(manipResult.uri, { md5: false });
       size = fileInfo.exists && 'size' in fileInfo ? fileInfo.size : 0;
     } catch (error) {
       console.warn('Failed to get file size:', error);

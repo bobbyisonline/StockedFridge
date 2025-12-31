@@ -7,12 +7,12 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '@/constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, LAYOUT } from '@/constants/theme';
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'danger' | 'ghost';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
@@ -48,6 +48,13 @@ export function Button({
     textStyle,
   ];
 
+  const getLoaderColor = () => {
+    if (variant === 'primary' || variant === 'secondary' || variant === 'danger') {
+      return COLORS.primaryTextOn;
+    }
+    return COLORS.primary;
+  };
+
   return (
     <TouchableOpacity
       style={buttonStyles}
@@ -56,9 +63,7 @@ export function Button({
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator
-          color={variant === 'primary' ? COLORS.background : COLORS.primary}
-        />
+        <ActivityIndicator color={getLoaderColor()} />
       ) : (
         <Text style={textStyles}>{title}</Text>
       )}
@@ -71,33 +76,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
+    minHeight: LAYOUT.minTapTarget,
   },
   button_primary: {
     backgroundColor: COLORS.primary,
   },
   button_secondary: {
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  button_tertiary: {
+    backgroundColor: 'transparent',
   },
   button_outline: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: COLORS.primary,
+  },
+  button_danger: {
+    backgroundColor: COLORS.danger,
   },
   button_ghost: {
     backgroundColor: 'transparent',
   },
   button_small: {
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-  },
-  button_medium: {
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.lg,
+    minHeight: 36,
   },
-  button_large: {
+  button_medium: {
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.xl,
+  },
+  button_large: {
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xxl,
   },
   fullWidth: {
     width: '100%',
@@ -106,27 +121,34 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
+    fontSize: TYPOGRAPHY.body.fontSize,
     fontWeight: '600',
   },
   text_primary: {
-    color: COLORS.background,
+    color: COLORS.primaryTextOn,
   },
   text_secondary: {
-    color: COLORS.background,
+    color: COLORS.text,
+  },
+  text_tertiary: {
+    color: COLORS.textMuted,
   },
   text_outline: {
     color: COLORS.primary,
+  },
+  text_danger: {
+    color: COLORS.primaryTextOn,
   },
   text_ghost: {
     color: COLORS.primary,
   },
   text_small: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: TYPOGRAPHY.caption.fontSize,
   },
   text_medium: {
-    fontSize: FONT_SIZES.md,
+    fontSize: TYPOGRAPHY.body.fontSize,
   },
   text_large: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: TYPOGRAPHY.h3.fontSize,
   },
 });

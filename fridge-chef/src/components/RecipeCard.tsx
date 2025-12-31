@@ -84,9 +84,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: COLORS.text,
     marginBottom: SPACING.xs,
+    lineHeight: 24,
   },
   description: {
     fontSize: FONT_SIZES.sm,
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.xs,
+    gap: SPACING.sm,
     alignItems: 'center',
   },
   moreText: {

@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Image, StyleSheet, ScrollView } from 'react-native';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, LAYOUT } from '@/constants/theme';
+import { Caption, Body } from '@/components/ui/Typography';
 
 interface ImagePreviewProps {
   imageUri: string;
@@ -18,64 +19,78 @@ export function ImagePreview({
   isProcessing = false,
 }: ImagePreviewProps) {
   return (
-    <Card style={styles.container}>
-      <Text style={styles.title}>Preview Your Image</Text>
-      
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUri }} style={styles.image} />
-      </View>
+    <ScrollView 
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.content}>
+        <Card style={styles.imageCard} padding="none">
+          <Image source={{ uri: imageUri }} style={styles.image} />
+        </Card>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Retake"
-          onPress={onRetake}
-          variant="outline"
-          disabled={isProcessing}
-          style={styles.button}
-        />
-        
-        <Button
-          title="Generate Recipe"
-          onPress={onConfirm}
-          disabled={isProcessing}
-          loading={isProcessing}
-          style={styles.button}
-        />
+        <Caption style={styles.helperText}>
+          Make sure ingredients are visible and well-lit
+        </Caption>
+
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Retake"
+            onPress={onRetake}
+            variant="tertiary"
+            disabled={isProcessing}
+            style={styles.retakeButton}
+          />
+          
+          <Button
+            title="Generate Recipe"
+            onPress={onConfirm}
+            variant="primary"
+            size="large"
+            disabled={isProcessing}
+            loading={isProcessing}
+            style={styles.confirmButton}
+          />
+        </View>
       </View>
-    </Card>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    flexGrow: 1,
+    padding: LAYOUT.screenPadding,
   },
-  title: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-    textAlign: 'center',
+  content: {
+    flex: 1,
+    justifyContent: 'center',
   },
-  imageContainer: {
+  imageCard: {
     width: '100%',
     aspectRatio: 4 / 3,
-    borderRadius: BORDER_RADIUS.lg,
     overflow: 'hidden',
-    marginBottom: SPACING.lg,
-    backgroundColor: COLORS.surface,
+    marginBottom: SPACING.md,
   },
   image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
+  helperText: {
+    textAlign: 'center',
+    color: COLORS.textMuted,
+    marginBottom: SPACING.xxl,
+  },
   buttonContainer: {
     flexDirection: 'row',
-    width: '100%',
     gap: SPACING.md,
+    alignItems: 'center',
   },
-  button: {
+  retakeButton: {
+    flex: 0,
+    paddingHorizontal: SPACING.xl,
+  },
+  confirmButton: {
     flex: 1,
   },
 });

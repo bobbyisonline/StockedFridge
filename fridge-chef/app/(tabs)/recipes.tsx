@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
-  TextInput,
-  TouchableOpacity,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useRecipeStore } from '@/store/recipeStore';
 import { RecipeCard } from '@/components/RecipeCard';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/constants/theme';
+import { COLORS, SPACING, LAYOUT } from '@/constants/theme';
+import { Screen } from '@/components/ui/Screen';
+import { H1, Body, Caption } from '@/components/ui/Typography';
+import { TextField } from '@/components/ui/TextField';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function RecipesScreen() {
   const router = useRouter();
-  const { recipes, isLoading, searchRecipes } = useRecipeStore();
+  const { recipes, isLoading, searchRecipes, deleteRecipe } = useRecipeStore();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredRecipes = searchQuery
@@ -27,125 +28,105 @@ export default function RecipesScreen() {
     router.push(`/recipe/${recipeId}`);
   };
 
+  const renderRightActions = () => (
+    <View style={styles.swipeDeleteContainer}>
+      <Body style={styles.swipeDeleteText}>Delete</Body>
+    </View>
+  );
+
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <Screen>
         <LoadingSpinner message="Loading your recipes..." />
-      </SafeAreaView>
+      </Screen>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>My Recipes</Text>
-        
-        <View style={styles.searchContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search recipes..."
-            placeholderTextColor={COLORS.textLight}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Text style={styles.clearIcon}>✕</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        <H1 style={styles.title}>Recipes</H1>
+        <Caption style={styles.subtitle}>
+          {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'} saved
+        </Caption>
       </View>
 
+      {/* Search */}
+      <TextField
+        placeholder="Search recipes..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onClear={() => setSearchQuery('')}
+        showClearButton={searchQuery.length > 0}
+        leftIcon={<Body>🔍</Body>}
+        containerStyle={styles.searchField}
+      />
+
+      {/* Recipes List or Empty State */}
       {filteredRecipes.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📝</Text>
-          <Text style={styles.emptyTitle}>
-            {searchQuery ? 'No recipes found' : 'No recipes yet'}
-          </Text>
-          <Text style={styles.emptyText}>
-            {searchQuery
+        <EmptyState
+          icon={searchQuery ? '🔍' : '📝'}
+          title={searchQuery ? 'No recipes found' : 'No recipes yet'}
+          message={
+            searchQuery
               ? 'Try a different search term'
-              : 'Capture some ingredients to create your first recipe'}
-          </Text>
-        </View>
+              : 'Scan ingredients to create your first recipe'
+          }
+          actionLabel={searchQuery ? undefined : 'Scan Ingredients'}
+          onAction={searchQuery ? undefined : () => router.push('/')}
+        />
       ) : (
         <FlatList
           data={filteredRecipes}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <RecipeCard
-              recipe={item}
-              onPress={() => handleRecipePress(item.id)}
-            />
+            <Swipeable
+              renderRightActions={renderRightActions}
+              onSwipeableOpen={() => {
+                deleteRecipe(item.id);
+              }}
+            >
+              <RecipeCard
+                recipe={item}
+                onPress={() => handleRecipePress(item.id)}
+              />
+            </Swipeable>
           )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       )}
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
   header: {
-    padding: SPACING.lg,
-    backgroundColor: COLORS.background,
+    marginBottom: SPACING.lg,
   },
   title: {
-    fontSize: FONT_SIZES.xxxl,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.xs,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+  subtitle: {
+    color: COLORS.textMuted,
   },
-  searchIcon: {
-    fontSize: FONT_SIZES.lg,
-    marginRight: SPACING.sm,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text,
-  },
-  clearIcon: {
-    fontSize: FONT_SIZES.lg,
-    color: COLORS.textLight,
-    padding: SPACING.xs,
+  searchField: {
+    marginBottom: SPACING.lg,
   },
   listContent: {
-    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl,
   },
-  emptyContainer: {
-    flex: 1,
+  swipeDeleteContainer: {
+    backgroundColor: COLORS.danger,
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING.xl,
-  },
-  emptyIcon: {
-    fontSize: 64,
+    alignItems: 'flex-end',
+    paddingHorizontal: SPACING.xl,
     marginBottom: SPACING.md,
+    borderRadius: SPACING.md,
   },
-  emptyTitle: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  emptyText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
+  swipeDeleteText: {
+    color: COLORS.primaryTextOn,
+    fontWeight: '600',
   },
 });

@@ -1,15 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '@/constants/theme';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '@/constants/theme';
 import { RecipeTag as RecipeTagType } from '@/types';
 
 interface BadgeProps {
   label: string | RecipeTagType;
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
   size?: 'small' | 'medium';
   style?: ViewStyle;
 }
 
+/**
+ * Badge/Chip - Small tag/category pill
+ */
 export function Badge({
   label,
   variant = 'primary',
@@ -38,45 +41,53 @@ export function Badge({
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs / 2,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.full,
     alignSelf: 'flex-start',
   },
   badge_primary: {
-    backgroundColor: `${COLORS.primary}20`,
+    backgroundColor: COLORS.primaryMuted,
   },
   badge_secondary: {
-    backgroundColor: `${COLORS.secondary}20`,
+    backgroundColor: COLORS.warningMuted,
   },
   badge_success: {
-    backgroundColor: `${COLORS.success}20`,
+    backgroundColor: COLORS.successMuted,
   },
   badge_warning: {
-    backgroundColor: `${COLORS.warning}20`,
+    backgroundColor: COLORS.warningMuted,
   },
-  badge_error: {
-    backgroundColor: `${COLORS.error}20`,
+  badge_danger: {
+    backgroundColor: COLORS.dangerMuted,
   },
   badge_info: {
-    backgroundColor: `${COLORS.info}20`,
+    backgroundColor: COLORS.infoMuted,
+  },
+  badge_neutral: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   badge_small: {
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 2,
-  },
-  badge_medium: {
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs / 2,
   },
+  badge_medium: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+  },
   text: {
-    fontWeight: '600',
+    fontSize: TYPOGRAPHY.chipLabel.fontSize,
+    lineHeight: TYPOGRAPHY.chipLabel.lineHeight,
+    fontWeight: TYPOGRAPHY.chipLabel.fontWeight,
+    includeFontPadding: false,
   },
   text_primary: {
     color: COLORS.primary,
   },
   text_secondary: {
-    color: COLORS.secondary,
+    color: COLORS.warning,
   },
   text_success: {
     color: COLORS.success,
@@ -84,16 +95,19 @@ const styles = StyleSheet.create({
   text_warning: {
     color: COLORS.warning,
   },
-  text_error: {
-    color: COLORS.error,
+  text_danger: {
+    color: COLORS.danger,
   },
   text_info: {
     color: COLORS.info,
   },
+  text_neutral: {
+    color: COLORS.text,
+  },
   text_small: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: TYPOGRAPHY.small.fontSize,
   },
   text_medium: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: TYPOGRAPHY.chipLabel.fontSize,
   },
 });

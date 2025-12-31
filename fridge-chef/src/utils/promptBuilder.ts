@@ -1,6 +1,6 @@
 import { SYSTEM_PROMPTS } from '@/constants/prompts';
 
-export type PromptType = 'recipe' | 'ingredients' | 'refinement';
+export type PromptType = 'recipe' | 'ingredients' | 'refinement' | 'recommendations';
 
 export interface PromptOptions {
   customInstructions?: string;
@@ -26,6 +26,9 @@ export function buildSystemPrompt(
       break;
     case 'refinement':
       basePrompt = SYSTEM_PROMPTS.RECIPE_REFINEMENT;
+      break;
+    case 'recommendations':
+      basePrompt = SYSTEM_PROMPTS.INGREDIENT_RECOMMENDATIONS;
       break;
   }
 

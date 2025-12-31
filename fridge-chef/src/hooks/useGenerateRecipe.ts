@@ -3,6 +3,7 @@ import { LLMService, LLMServiceError } from '@/services/LLMService';
 import { ImageService } from '@/services/ImageService';
 import { useScanSessionStore } from '@/store/scanSessionStore';
 import { useRecipeStore } from '@/store/recipeStore';
+import { useFridgeStore } from '@/store/fridgeStore';
 import { LLMRequest, LLMStreamChunk } from '@/types';
 
 interface UseGenerateRecipeReturn {
@@ -28,6 +29,7 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
   } = useScanSessionStore();
   
   const { addRecipe } = useRecipeStore();
+  const { addItemsFromDetection } = useFridgeStore();
 
   const isGenerating = currentSession?.status === 'processing' || 
                        currentSession?.status === 'analyzing' ||
@@ -57,6 +59,16 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
         setGeneratedRecipe(response.recipe);
         await addRecipe(response.recipe);
         
+        // Add detected items to fridge
+        console.log('Detected items from LLM:', response.detectedItems);
+        if (response.detectedItems && response.detectedItems.length > 0) {
+          console.log('Adding items to fridge:', response.detectedItems);
+          await addItemsFromDetection(response.detectedItems, imageUri);
+          console.log('Items added to fridge successfully');
+        } else {
+          console.log('No detected items to add to fridge');
+        }
+        
         completeSession();
       } catch (error) {
         if (error instanceof LLMServiceError) {
@@ -75,7 +87,7 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
         completeSession();
       }
     },
-    [updateStatus, setImageBase64, setGeneratedRecipe, setError, completeSession, addRecipe]
+    [updateStatus, setImageBase64, setGeneratedRecipe, setError, completeSession, addRecipe, addItemsFromDetection]
   );
 
   const generateWithStreaming = useCallback(
@@ -107,6 +119,16 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
         setGeneratedRecipe(response.recipe);
         await addRecipe(response.recipe);
         
+        // Add detected items to fridge
+        console.log('Detected items from LLM:', response.detectedItems);
+        if (response.detectedItems && response.detectedItems.length > 0) {
+          console.log('Adding items to fridge:', response.detectedItems);
+          await addItemsFromDetection(response.detectedItems, imageUri);
+          console.log('Items added to fridge successfully');
+        } else {
+          console.log('No detected items to add to fridge');
+        }
+        
         completeSession();
       } catch (error) {
         if (error instanceof LLMServiceError) {
@@ -125,7 +147,7 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
         completeSession();
       }
     },
-    [updateStatus, setImageBase64, setGeneratedRecipe, setError, completeSession, addRecipe]
+    [updateStatus, setImageBase64, setGeneratedRecipe, setError, completeSession, addRecipe, addItemsFromDetection]
   );
 
   return {

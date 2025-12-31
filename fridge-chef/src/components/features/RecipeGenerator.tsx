@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { useGenerateRecipe } from '@/hooks/useGenerateRecipe';
 import { useScanSessionStore } from '@/store/scanSessionStore';
 import { Card } from '@/components/ui/Card';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { COLORS, SPACING, FONT_SIZES } from '@/constants/theme';
+import { COLORS, SPACING, LAYOUT } from '@/constants/theme';
+import { H2, Body, Caption } from '@/components/ui/Typography';
 import { LLMStreamChunk } from '@/types';
 
 interface RecipeGeneratorProps {
@@ -12,22 +12,39 @@ interface RecipeGeneratorProps {
   onComplete: () => void;
 }
 
+const loadingTips = [
+  'Finding perfect recipes...',
+  'Checking your pantry...',
+  'Analyzing ingredients...',
+  'Calculating nutrition...',
+  'Almost ready...',
+];
+
 export function RecipeGenerator({ imageUri, onComplete }: RecipeGeneratorProps) {
   const { generateWithStreaming, isGenerating } = useGenerateRecipe();
   const { currentSession } = useScanSessionStore();
   const [streamedContent, setStreamedContent] = useState('');
+  const [currentTip, setCurrentTip] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (imageUri && !isGenerating && !currentSession?.generatedRecipe) {
       handleGenerate();
     }
   }, [imageUri]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentSession?.generatedRecipe) {
       onComplete();
     }
   }, [currentSession?.generatedRecipe]);
+
+  // Rotate tips every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTip((prev) => (prev + 1) % loadingTips.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleGenerate = async () => {
     setStreamedContent('');
@@ -42,105 +59,107 @@ export function RecipeGenerator({ imageUri, onComplete }: RecipeGeneratorProps) 
     );
   };
 
-  const getStatusMessage = () => {
-    switch (currentSession?.status) {
-      case 'processing':
-        return 'Preparing image...';
-      case 'analyzing':
-        return 'Analyzing ingredients...';
-      case 'streaming':
-        return 'Generating your recipe...';
-      case 'error':
-        return currentSession.error?.message || 'An error occurred';
-      default:
-        return 'Processing...';
-    }
-  };
-
   if (currentSession?.status === 'error') {
     return (
-      <Card style={styles.container}>
-        <View style={styles.errorContainer}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Card style={styles.errorCard}>
           <Text style={styles.errorIcon}>⚠️</Text>
-          <Text style={styles.errorTitle}>Something went wrong</Text>
-          <Text style={styles.errorMessage}>{currentSession.error?.message}</Text>
-        </View>
-      </Card>
+          <H2 style={styles.errorTitle}>Something went wrong</H2>
+          <Body style={styles.errorMessage}>{currentSession.error?.message}</Body>
+        </Card>
+      </ScrollView>
     );
   }
 
   return (
-    <Card style={styles.container}>
-      <Text style={styles.title}>Creating Your Recipe</Text>
-      
-      <LoadingSpinner message={getStatusMessage()} />
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.content}>
+        <Card style={styles.progressCard}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          
+          <H2 style={styles.title}>Creating Your Recipe</H2>
+          
+          <Body style={styles.tip}>{loadingTips[currentTip]}</Body>
+          
+          {streamedContent && (
+            <View style={styles.streamContainer}>
+              <Caption style={styles.streamText} numberOfLines={3}>
+                {streamedContent}
+              </Caption>
+            </View>
+          )}
+        </Card>
 
-      {streamedContent && (
-        <ScrollView style={styles.streamContainer}>
-          <Text style={styles.streamText}>{streamedContent}</Text>
-        </ScrollView>
-      )}
-
-      <View style={styles.tipContainer}>
-        <Text style={styles.tipText}>
-          💡 This usually takes 10-15 seconds
-        </Text>
+        <View style={styles.infoBox}>
+          <Caption style={styles.infoText}>
+            ⏱️ This usually takes 10–15 seconds
+          </Caption>
+        </View>
       </View>
-    </Card>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: 300,
+    flexGrow: 1,
+    padding: LAYOUT.screenPadding,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  progressCard: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xxxl,
   },
   title: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.lg,
     textAlign: 'center',
+    marginTop: SPACING.xxl,
+    marginBottom: SPACING.lg,
+  },
+  tip: {
+    textAlign: 'center',
+    color: COLORS.primary,
+    fontWeight: '500',
   },
   streamContainer: {
-    maxHeight: 200,
-    marginTop: SPACING.lg,
-    padding: SPACING.md,
-    backgroundColor: COLORS.surface,
-    borderRadius: 8,
+    marginTop: SPACING.xl,
+    paddingTop: SPACING.xl,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.divider,
+    width: '100%',
   },
   streamText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    lineHeight: FONT_SIZES.sm * 1.5,
-  },
-  tipContainer: {
-    marginTop: SPACING.lg,
-    padding: SPACING.md,
-    backgroundColor: `${COLORS.info}10`,
-    borderRadius: 8,
-  },
-  tipText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text,
     textAlign: 'center',
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
   },
-  errorContainer: {
+  infoBox: {
+    marginTop: SPACING.xl,
+    padding: SPACING.md,
+    backgroundColor: COLORS.infoMuted,
+    borderRadius: SPACING.md,
+  },
+  infoText: {
+    textAlign: 'center',
+    color: COLORS.info,
+  },
+  errorCard: {
     alignItems: 'center',
-    padding: SPACING.xl,
+    paddingVertical: SPACING.xxxl,
   },
   errorIcon: {
     fontSize: 64,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   errorTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.error,
-    marginBottom: SPACING.sm,
+    textAlign: 'center',
+    color: COLORS.danger,
+    marginBottom: SPACING.md,
   },
   errorMessage: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
     textAlign: 'center',
+    color: COLORS.textMuted,
   },
 });

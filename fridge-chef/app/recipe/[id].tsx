@@ -1,14 +1,12 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   Image,
   Share,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRecipeStore } from '@/store/recipeStore';
 import { IngredientList } from '@/components/IngredientList';
@@ -17,7 +15,10 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { COLORS, SPACING, FONT_SIZES } from '@/constants/theme';
+import { COLORS, SPACING, LAYOUT } from '@/constants/theme';
+import { Screen } from '@/components/ui/Screen';
+import { H1, H2, Body, Caption } from '@/components/ui/Typography';
+import { Divider } from '@/components/ui/Divider';
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -62,31 +63,34 @@ export default function RecipeDetailScreen() {
 
   if (!recipe) {
     return (
-      <SafeAreaView style={styles.container}>
+      <Screen>
         <LoadingSpinner message="Loading recipe..." />
-      </SafeAreaView>
+      </Screen>
     );
   }
 
   const totalTime = recipe.prepTime + recipe.cookTime;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen padding={false} backgroundColor={COLORS.bg}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Hero Image */}
         {recipe.imageUri && (
           <Image source={{ uri: recipe.imageUri }} style={styles.heroImage} />
         )}
 
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>{recipe.title}</Text>
+          <H1 style={styles.title}>{recipe.title}</H1>
           
           {recipe.description && (
-            <Text style={styles.description}>{recipe.description}</Text>
+            <Body style={styles.description}>{recipe.description}</Body>
           )}
 
+          {/* Tags/Chips */}
           <View style={styles.tagsContainer}>
             {recipe.tags.map((tag) => (
               <Badge key={tag} label={tag} variant="primary" size="small" />
@@ -94,74 +98,75 @@ export default function RecipeDetailScreen() {
           </View>
         </View>
 
-        {/* Meta Info */}
-        <Card style={styles.card}>
-          <View style={styles.metaGrid}>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaIcon}>⏱️</Text>
-              <Text style={styles.metaLabel}>Total Time</Text>
-              <Text style={styles.metaValue}>{totalTime} min</Text>
-            </View>
-
-            <View style={styles.metaItem}>
-              <Text style={styles.metaIcon}>🍽️</Text>
-              <Text style={styles.metaLabel}>Servings</Text>
-              <Text style={styles.metaValue}>{recipe.servings}</Text>
-            </View>
-
-            <View style={styles.metaItem}>
-              <Text style={styles.metaIcon}>📊</Text>
-              <Text style={styles.metaLabel}>Difficulty</Text>
-              <Text style={styles.metaValue}>{recipe.difficulty}</Text>
-            </View>
-          </View>
-        </Card>
-
-        {/* Macros */}
-        {recipe.macros && (
-          <Card style={styles.card}>
-            <Text style={styles.sectionTitle}>Nutrition</Text>
-            <View style={styles.macrosGrid}>
-              <View style={styles.macroItem}>
-                <Text style={styles.macroValue}>{recipe.macros.calories}</Text>
-                <Text style={styles.macroLabel}>Calories</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <Text style={styles.macroValue}>{recipe.macros.protein}g</Text>
-                <Text style={styles.macroLabel}>Protein</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <Text style={styles.macroValue}>{recipe.macros.carbs}g</Text>
-                <Text style={styles.macroLabel}>Carbs</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <Text style={styles.macroValue}>{recipe.macros.fat}g</Text>
-                <Text style={styles.macroLabel}>Fat</Text>
-              </View>
-            </View>
+        {/* Stats Cards */}
+        <View style={styles.statsRow}>
+          <Card style={styles.statCard} variant="filled" padding="small">
+            <Caption style={styles.statIcon}>⏱️</Caption>
+            <Body style={styles.statValue}>{totalTime} min</Body>
+            <Caption>Time</Caption>
           </Card>
+
+          <Card style={styles.statCard} variant="filled" padding="small">
+            <Caption style={styles.statIcon}>🍽️</Caption>
+            <Body style={styles.statValue}>{recipe.servings}</Body>
+            <Caption>Servings</Caption>
+          </Card>
+
+          <Card style={styles.statCard} variant="filled" padding="small">
+            <Caption style={styles.statIcon}>📊</Caption>
+            <Body style={styles.statValue}>{recipe.difficulty}</Body>
+            <Caption>Difficulty</Caption>
+          </Card>
+        </View>
+
+        {/* Nutrition */}
+        {recipe.macros && (
+          <View style={styles.section}>
+            <H2 style={styles.sectionTitle}>Nutrition</H2>
+            <Card variant="filled">
+              <View style={styles.nutritionGrid}>
+                <View style={styles.nutritionItem}>
+                  <Body style={styles.nutritionValue}>{recipe.macros.calories}</Body>
+                  <Caption>Calories</Caption>
+                </View>
+                <View style={styles.nutritionItem}>
+                  <Body style={styles.nutritionValue}>{recipe.macros.protein}g</Body>
+                  <Caption>Protein</Caption>
+                </View>
+                <View style={styles.nutritionItem}>
+                  <Body style={styles.nutritionValue}>{recipe.macros.carbs}g</Body>
+                  <Caption>Carbs</Caption>
+                </View>
+                <View style={styles.nutritionItem}>
+                  <Body style={styles.nutritionValue}>{recipe.macros.fat}g</Body>
+                  <Caption>Fat</Caption>
+                </View>
+              </View>
+            </Card>
+          </View>
         )}
 
         {/* Ingredients */}
-        <Card style={styles.card}>
-          <Text style={styles.sectionTitle}>Ingredients</Text>
+        <View style={styles.section}>
+          <H2 style={styles.sectionTitle}>Ingredients</H2>
           <IngredientList ingredients={recipe.ingredients} showCategory />
-        </Card>
+        </View>
 
-        {/* Steps */}
-        <Card style={styles.card}>
-          <Text style={styles.sectionTitle}>Instructions</Text>
+        <Divider />
+
+        {/* Instructions */}
+        <View style={styles.section}>
+          <H2 style={styles.sectionTitle}>Instructions</H2>
           <RecipeSteps steps={recipe.steps} />
-        </Card>
+        </View>
 
-        {/* Actions */}
+        {/* Bottom Actions */}
         <View style={styles.actions}>
           <Button
             title="Share Recipe"
             onPress={handleShare}
             variant="primary"
             fullWidth
-            style={styles.actionButton}
           />
           
           <Button
@@ -169,99 +174,93 @@ export default function RecipeDetailScreen() {
             onPress={handleDelete}
             variant="outline"
             fullWidth
+            style={styles.deleteButton}
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
   scrollContent: {
-    paddingBottom: SPACING.xl,
+    paddingBottom: SPACING.xxxl,
   },
   heroImage: {
     width: '100%',
-    height: 250,
+    height: 280,
     resizeMode: 'cover',
   },
   header: {
-    padding: SPACING.lg,
+    padding: LAYOUT.screenPadding,
+    paddingBottom: SPACING.lg,
   },
   title: {
-    fontSize: FONT_SIZES.xxxl,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.md,
   },
   description: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.md,
-    lineHeight: FONT_SIZES.md * 1.5,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.lg,
+    lineHeight: 24,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.xs,
+    gap: SPACING.sm,
+    marginTop: SPACING.xs,
   },
-  card: {
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  sectionTitle: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  metaGrid: {
+  statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    paddingHorizontal: LAYOUT.screenPadding,
+    gap: SPACING.md,
+    marginBottom: LAYOUT.sectionSpacing,
   },
-  metaItem: {
+  statCard: {
+    flex: 1,
     alignItems: 'center',
+    minHeight: 88,
+    justifyContent: 'center',
   },
-  metaIcon: {
-    fontSize: 32,
+  statIcon: {
+    fontSize: 28,
+    lineHeight: 32,
     marginBottom: SPACING.xs,
   },
-  metaLabel: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    marginBottom: 2,
-  },
-  metaValue: {
-    fontSize: FONT_SIZES.md,
+  statValue: {
     fontWeight: '600',
-    color: COLORS.text,
+    marginBottom: SPACING.xs,
   },
-  macrosGrid: {
+  section: {
+    paddingHorizontal: LAYOUT.screenPadding,
+    marginBottom: LAYOUT.sectionSpacing,
+  },
+  sectionTitle: {
+    marginBottom: SPACING.lg,
+  },
+  nutritionGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    gap: SPACING.lg,
   },
-  macroItem: {
+  nutritionItem: {
     alignItems: 'center',
+    flex: 1,
+    minWidth: '40%',
   },
-  macroValue: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: 'bold',
+  nutritionValue: {
+    fontWeight: '600',
     color: COLORS.primary,
-    marginBottom: 2,
-  },
-  macroLabel: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
+    fontSize: 20,
+    marginBottom: SPACING.xs,
   },
   actions: {
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: LAYOUT.screenPadding,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.xl,
     gap: SPACING.md,
   },
-  actionButton: {
+  deleteButton: {
+    borderColor: COLORS.danger,
     marginBottom: SPACING.sm,
   },
 });

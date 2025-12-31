@@ -7,6 +7,14 @@ export type {
   Recipe,
 } from './recipe.types';
 
+// Fridge types
+export type {
+  FridgeItem,
+  FridgeItemInput,
+  IngredientRecommendation,
+  FridgeRecommendations,
+} from './fridge.types';
+
 // Scan types
 export type {
   ScanStatus,

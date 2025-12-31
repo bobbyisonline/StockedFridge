@@ -1,27 +1,27 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   Switch,
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { StorageService } from '@/services/StorageService';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { COLORS, SPACING, FONT_SIZES } from '@/constants/theme';
+import { COLORS, SPACING, LAYOUT } from '@/constants/theme';
+import { Screen } from '@/components/ui/Screen';
+import { H1, H2, Body, Caption } from '@/components/ui/Typography';
+import { Divider } from '@/components/ui/Divider';
 
 export default function SettingsScreen() {
   const {
     notificationsEnabled,
     servingsDefault,
     dietaryRestrictions,
-    preferredCuisines,
     toggleNotifications,
     setServingsDefault,
   } = useSettingsStore();
@@ -51,38 +51,43 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Settings</Text>
+        <H1 style={styles.title}>Settings</H1>
 
-        {/* Statistics Card */}
-        <Card style={styles.card}>
-          <Text style={styles.sectionTitle}>Statistics</Text>
-          <View style={styles.statRow}>
-            <Text style={styles.statLabel}>Total Recipes</Text>
-            <Text style={styles.statValue}>{recipes.length}</Text>
-          </View>
-        </Card>
+        {/* Statistics Section */}
+        <View style={styles.section}>
+          <Caption style={styles.sectionLabel}>STATISTICS</Caption>
+          <Card variant="filled">
+            <View style={styles.statRow}>
+              <Body>Total Recipes</Body>
+              <H2 style={styles.statValue}>{recipes.length}</H2>
+            </View>
+          </Card>
+        </View>
 
-        {/* Preferences Card */}
-        <Card style={styles.card}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          
-          <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Notifications</Text>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={toggleNotifications}
-              trackColor={{ false: COLORS.border, true: COLORS.primary }}
-              thumbColor={COLORS.background}
-            />
-          </View>
+        {/* Preferences Section */}
+        <View style={styles.section}>
+          <Caption style={styles.sectionLabel}>PREFERENCES</Caption>
+          <Card variant="filled">
+            <View style={styles.settingRow}>
+              <Body>Notifications</Body>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={toggleNotifications}
+                trackColor={{ false: COLORS.border, true: COLORS.primary }}
+                thumbColor={COLORS.primaryTextOn}
+              />
+            </View>
 
-          <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Default Servings</Text>
+            <Divider spacing="none" style={styles.divider} />
+
+            <View style={styles.settingRow}>
+              <Body style={styles.settingLabel}>Default Servings</Body>
+            </View>
             <View style={styles.servingsButtons}>
               {[1, 2, 4, 6].map((num) => (
                 <TouchableOpacity
@@ -93,166 +98,183 @@ export default function SettingsScreen() {
                   ]}
                   onPress={() => setServingsDefault(num)}
                 >
-                  <Text
-                    style={[
-                      styles.servingButtonText,
-                      servingsDefault === num && styles.servingButtonTextActive,
-                    ]}
+                  <Body
+                    color={servingsDefault === num ? COLORS.primary : COLORS.text}
+                    style={
+                      servingsDefault === num
+                        ? styles.servingButtonTextActive
+                        : styles.servingButtonText
+                    }
                   >
                     {num}
-                  </Text>
+                  </Body>
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
-        </Card>
+          </Card>
+        </View>
 
-        {/* Dietary Restrictions Card */}
-        <Card style={styles.card}>
-          <Text style={styles.sectionTitle}>Dietary Restrictions</Text>
-          {dietaryRestrictions.length === 0 ? (
-            <Text style={styles.emptyText}>No restrictions set</Text>
-          ) : (
-            <View style={styles.tagContainer}>
-              {dietaryRestrictions.map((restriction) => (
-                <View key={restriction} style={styles.tag}>
-                  <Text style={styles.tagText}>{restriction}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </Card>
+        {/* Dietary Restrictions Section */}
+        <View style={styles.section}>
+          <Caption style={styles.sectionLabel}>DIETARY RESTRICTIONS</Caption>
+          <Card variant="filled">
+            {dietaryRestrictions.length === 0 ? (
+              <View>
+                <Caption style={styles.emptyText}>No restrictions set</Caption>
+                <Button
+                  title="Set Dietary Preferences"
+                  onPress={() => Alert.alert('Coming Soon', 'This feature is under development')}
+                  variant="tertiary"
+                  size="small"
+                  style={styles.addButton}
+                />
+              </View>
+            ) : (
+              <View style={styles.tagContainer}>
+                {dietaryRestrictions.map((restriction) => (
+                  <View key={restriction} style={styles.tag}>
+                    <Caption style={styles.tagText}>{restriction}</Caption>
+                  </View>
+                ))}
+              </View>
+            )}
+          </Card>
+        </View>
 
-        {/* About Card */}
-        <Card style={styles.card}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <Text style={styles.aboutText}>Fridge Chef v1.0.0</Text>
-          <Text style={styles.aboutDescription}>
-            Transform your ingredients into delicious recipes using AI
-          </Text>
-        </Card>
+        {/* About Section */}
+        <View style={styles.section}>
+          <Caption style={styles.sectionLabel}>ABOUT</Caption>
+          <Card variant="filled">
+            <Body style={styles.aboutVersion}>StockedFridge v1.0.0</Body>
+            <Caption style={styles.aboutDescription}>
+              Transform your ingredients into delicious recipes using AI
+            </Caption>
+          </Card>
+        </View>
 
         {/* Danger Zone */}
-        <Card style={styles.dangerCard}>
-          <Text style={styles.sectionTitle}>Danger Zone</Text>
+        <View style={styles.section}>
+          <Caption style={styles.dangerLabel}>DANGER ZONE</Caption>
           <Button
             title="Clear All Data"
             onPress={handleClearData}
             variant="outline"
             fullWidth
+            style={styles.dangerButton}
           />
-        </Card>
+          <Caption style={styles.dangerNote}>
+            This will delete all your recipes and settings permanently
+          </Caption>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
   scrollContent: {
-    padding: SPACING.lg,
+    paddingBottom: SPACING.xxxl,
   },
   title: {
-    fontSize: FONT_SIZES.xxxl,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.xxl,
   },
-  card: {
-    marginBottom: SPACING.md,
+  section: {
+    marginBottom: SPACING.xxl,
   },
-  sectionTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: '700',
-    color: COLORS.text,
+  sectionLabel: {
+    fontWeight: '600',
+    letterSpacing: 1,
     marginBottom: SPACING.md,
+    color: COLORS.textMuted,
   },
   statRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: SPACING.sm,
-  },
-  statLabel: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
   },
   statValue: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: '700',
     color: COLORS.primary,
   },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    minHeight: LAYOUT.minTapTarget,
   },
   settingLabel: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text,
+    flex: 1,
+  },
+  divider: {
+    marginVertical: SPACING.md,
   },
   servingsButtons: {
     flexDirection: 'row',
-    gap: SPACING.xs,
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
   },
   servingButton: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: 8,
-    borderWidth: 1,
+    flex: 1,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: SPACING.md,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1.5,
     borderColor: COLORS.border,
+    alignItems: 'center',
   },
   servingButtonActive: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.primaryMuted,
     borderColor: COLORS.primary,
   },
   servingButtonText: {
-    fontSize: FONT_SIZES.sm,
     color: COLORS.text,
+    fontWeight: '500',
   },
   servingButtonTextActive: {
-    color: COLORS.background,
+    color: COLORS.primary,
     fontWeight: '600',
   },
   emptyText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-    fontStyle: 'italic',
+    color: COLORS.textMuted,
+    marginBottom: SPACING.md,
+  },
+  addButton: {
+    alignSelf: 'flex-start',
   },
   tagContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.xs,
+    gap: SPACING.sm,
   },
   tag: {
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: 8,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.primaryMuted,
+    borderRadius: SPACING.md,
   },
   tagText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.text,
+    color: COLORS.primary,
+    fontWeight: '500',
   },
-  aboutText: {
-    fontSize: FONT_SIZES.md,
+  aboutVersion: {
     fontWeight: '600',
-    color: COLORS.text,
     marginBottom: SPACING.xs,
   },
   aboutDescription: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
   },
-  dangerCard: {
+  dangerLabel: {
+    fontWeight: '600',
+    letterSpacing: 1,
     marginBottom: SPACING.md,
-    borderColor: COLORS.error,
-    borderWidth: 1,
+    color: COLORS.danger,
+  },
+  dangerButton: {
+    borderColor: COLORS.danger,
+    marginBottom: SPACING.sm,
+  },
+  dangerNote: {
+    color: COLORS.textMuted,
+    textAlign: 'center',
   },
 });

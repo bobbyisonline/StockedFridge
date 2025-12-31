@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Fridge Chef",
+    "name": "StockedFridge",
     "slug": "fridge-chef",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -46,13 +46,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Fridge Chef to access your camera to capture ingredient photos."
+          "cameraPermission": "Allow StockedFridge to access your camera to capture ingredient photos."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Fridge Chef to access your photos to select ingredient images."
+          "photosPermission": "Allow StockedFridge to access your photos to select ingredient images."
         }
       ]
     ],
