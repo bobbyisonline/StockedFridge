@@ -141,8 +141,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 350,
+    height: 108,
     marginBottom: SPACING.md,
   },
   title: {
