@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { RecipeStep as RecipeStepType } from '@/types';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/constants/theme';
 
@@ -24,14 +25,14 @@ export function RecipeSteps({ steps, style }: RecipeStepsProps) {
               <View style={styles.metaContainer}>
                 {step.duration && (
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaIcon}>⏱️</Text>
+                    <Feather name="clock" size={14} color={COLORS.textMuted} />
                     <Text style={styles.metaText}>{step.duration} min</Text>
                   </View>
                 )}
                 
                 {step.temperature && (
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaIcon}>🌡️</Text>
+                    <Feather name="thermometer" size={14} color={COLORS.textMuted} />
                     <Text style={styles.metaText}>
                       {step.temperature.value}°{step.temperature.unit === 'celsius' ? 'C' : 'F'}
                     </Text>
@@ -86,9 +87,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
-  },
-  metaIcon: {
-    fontSize: FONT_SIZES.sm,
   },
   metaText: {
     fontSize: FONT_SIZES.sm,

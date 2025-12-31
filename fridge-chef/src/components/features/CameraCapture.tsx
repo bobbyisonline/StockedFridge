@@ -8,12 +8,13 @@ import { Caption } from '@/components/ui/Typography';
 
 interface CameraCaptureProps {
   onImageCaptured: (uri: string, base64: string) => void;
+  onMultipleImagesCaptured?: (images: Array<{ uri: string; base64: string }>) => void;
   disabled?: boolean;
 }
 
-export function CameraCapture({ onImageCaptured, disabled }: CameraCaptureProps) {
+export function CameraCapture({ onImageCaptured, onMultipleImagesCaptured, disabled }: CameraCaptureProps) {
   const { captureImage, isCapturing, error: cameraError } = useCamera();
-  const { pickImage, isPicking, error: pickerError } = useImagePicker();
+  const { pickImage, pickMultipleImages, isPicking, error: pickerError } = useImagePicker();
 
   const handleCapture = async () => {
     const result = await captureImage();
@@ -29,6 +30,19 @@ export function CameraCapture({ onImageCaptured, disabled }: CameraCaptureProps)
     }
   };
 
+  const handlePickMultiple = async () => {
+    if (!onMultipleImagesCaptured) return;
+    
+    const result = await pickMultipleImages();
+    if (result && !result.cancelled && result.images.length > 0) {
+      const images = result.images.map(img => ({
+        uri: img.uri,
+        base64: img.compressed.base64,
+      }));
+      onMultipleImagesCaptured(images);
+    }
+  };
+
   const error = cameraError || pickerError;
 
   return (
@@ -40,7 +54,7 @@ export function CameraCapture({ onImageCaptured, disabled }: CameraCaptureProps)
       )}
 
       <Button
-        title="📸  Scan Ingredients"
+        title="Scan Ingredients"
         onPress={handleCapture}
         disabled={disabled || isCapturing || isPicking}
         loading={isCapturing}
@@ -51,8 +65,8 @@ export function CameraCapture({ onImageCaptured, disabled }: CameraCaptureProps)
       />
       
       <Button
-        title="Upload Photo"
-        onPress={handlePick}
+        title="Upload Photos"
+        onPress={onMultipleImagesCaptured ? handlePickMultiple : handlePick}
         variant="secondary"
         size="medium"
         disabled={disabled || isCapturing || isPicking}

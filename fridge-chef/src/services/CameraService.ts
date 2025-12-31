@@ -7,6 +7,14 @@ export interface CameraServiceResult {
   cancelled: boolean;
 }
 
+export interface MultiImageResult {
+  images: Array<{
+    uri: string;
+    compressed: ImageCompressionResult;
+  }>;
+  cancelled: boolean;
+}
+
 export class CameraService {
   /**
    * Requests camera permissions
@@ -100,6 +108,45 @@ export class CameraService {
     return {
       uri: result.assets[0].uri,
       compressed,
+      cancelled: false,
+    };
+  }
+
+  /**
+   * Launches the image picker to select multiple images from gallery
+   */
+  static async pickMultipleImages(): Promise<MultiImageResult> {
+    const hasPermission = await this.hasMediaLibraryPermission();
+    if (!hasPermission) {
+      const granted = await this.requestMediaLibraryPermission();
+      if (!granted) {
+        throw new Error('Media library permission denied');
+      }
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+
+    if (result.canceled || !result.assets) {
+      return { images: [], cancelled: true };
+    }
+
+    // Compress all selected images
+    const images = await Promise.all(
+      result.assets.map(async (asset) => {
+        const compressed = await compressImage(asset.uri);
+        return {
+          uri: asset.uri,
+          compressed,
+        };
+      })
+    );
+
+    return {
+      images,
       cancelled: false,
     };
   }

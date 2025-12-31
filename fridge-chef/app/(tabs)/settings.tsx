@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRecipeStore } from '@/store/recipeStore';
+import { useFridgeStore } from '@/store/fridgeStore';
+import { useScanSessionStore } from '@/store/scanSessionStore';
 import { StorageService } from '@/services/StorageService';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -24,9 +26,12 @@ export default function SettingsScreen() {
     dietaryRestrictions,
     toggleNotifications,
     setServingsDefault,
+    reset: resetSettings,
   } = useSettingsStore();
 
-  const { recipes } = useRecipeStore();
+  const { recipes, reset: resetRecipes } = useRecipeStore();
+  const { clearAll: clearFridge } = useFridgeStore();
+  const { resetSession } = useScanSessionStore();
 
   const handleClearData = () => {
     Alert.alert(
@@ -39,7 +44,15 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
+              // Clear AsyncStorage
               await StorageService.clearAll();
+              
+              // Reset all Zustand stores
+              resetRecipes();
+              resetSettings();
+              clearFridge();
+              resetSession();
+              
               Alert.alert('Success', 'All data has been cleared');
             } catch (error) {
               Alert.alert('Error', 'Failed to clear data');

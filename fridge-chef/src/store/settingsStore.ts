@@ -14,6 +14,7 @@ interface SettingsState extends UserSettings {
   removePreferredCuisine: (cuisine: string) => Promise<void>;
   setServingsDefault: (servings: number) => Promise<void>;
   toggleNotifications: () => Promise<void>;
+  reset: () => void;
 }
 
 const defaultSettings: UserSettings = {
@@ -96,5 +97,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await get().updateSettings({
       notificationsEnabled: !get().notificationsEnabled,
     });
+  },
+
+  reset: () => {
+    set({ ...defaultSettings, isLoading: false, error: null });
   },
 }));

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useGenerateRecipe } from '@/hooks/useGenerateRecipe';
 import { useScanSessionStore } from '@/store/scanSessionStore';
 import { Card } from '@/components/ui/Card';
@@ -63,7 +64,9 @@ export function RecipeGenerator({ imageUri, onComplete }: RecipeGeneratorProps) 
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <Card style={styles.errorCard}>
-          <Text style={styles.errorIcon}>⚠️</Text>
+          <View style={styles.errorIconContainer}>
+            <Feather name="alert-circle" size={64} color={COLORS.danger} />
+          </View>
           <H2 style={styles.errorTitle}>Something went wrong</H2>
           <Body style={styles.errorMessage}>{currentSession.error?.message}</Body>
         </Card>
@@ -92,7 +95,7 @@ export function RecipeGenerator({ imageUri, onComplete }: RecipeGeneratorProps) 
 
         <View style={styles.infoBox}>
           <Caption style={styles.infoText}>
-            ⏱️ This usually takes 10–15 seconds
+            This usually takes 10-15 seconds
           </Caption>
         </View>
       </View>
@@ -149,8 +152,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.xxxl,
   },
-  errorIcon: {
-    fontSize: 64,
+  errorIconContainer: {
     marginBottom: SPACING.lg,
   },
   errorTitle: {

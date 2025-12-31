@@ -15,6 +15,7 @@ interface RecipeState {
   getRecipeById: (id: string) => Recipe | undefined;
   searchRecipes: (query: string) => Recipe[];
   filterByTags: (tags: string[]) => Recipe[];
+  reset: () => void;
 }
 
 export const useRecipeStore = create<RecipeState>((set, get) => ({
@@ -97,5 +98,9 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
     return get().recipes.filter((recipe) =>
       tags.every((tag) => recipe.tags.includes(tag as any))
     );
+  },
+
+  reset: () => {
+    set({ recipes: [], isLoading: false, error: null });
   },
 }));

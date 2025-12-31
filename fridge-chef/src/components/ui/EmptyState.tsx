@@ -1,41 +1,86 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { COLORS, SPACING } from '@/constants/theme';
 import { H3, Body } from './Typography';
 import { Button } from './Button';
 
 interface EmptyStateProps {
-  icon?: string;
+  /**
+   * Icon name from Feather icon set (e.g. 'inbox', 'search', 'alert-circle')
+   * See: https://feathericons.com/
+   */
+  iconName?: keyof typeof Feather.glyphMap;
+  /**
+   * Primary heading describing the empty state
+   */
   title: string;
-  message: string;
+  /**
+   * Optional description providing guidance or context
+   */
+  description?: string;
+  /**
+   * Optional action button label
+   */
   actionLabel?: string;
+  /**
+   * Optional action button callback
+   */
   onAction?: () => void;
+  /**
+   * Compact mode for use in bottom sheets or constrained spaces
+   */
+  compact?: boolean;
 }
 
 /**
- * EmptyState - Consistent empty state with icon, message, and optional CTA
+ * EmptyState - Layout-safe empty state component with consistent styling
+ * 
+ * Features:
+ * - Simple outline icons (Feather) for visual consistency
+ * - Responsive sizing for bottom sheets and full screens
+ * - Clear copy guidelines: title describes state, description explains next steps
+ * - Optional action button for primary CTA
+ * 
+ * Usage:
+ * - Full screen: <EmptyState iconName="inbox" title="No items yet" />
+ * - Bottom sheet: <EmptyState iconName="search" title="No results" compact />
+ * - With action: <EmptyState iconName="camera" onAction={scan} actionLabel="Scan" />
  */
 export function EmptyState({
-  icon = '📭',
+  iconName,
   title,
-  message,
+  description,
   actionLabel,
   onAction,
+  compact = false,
 }: EmptyStateProps) {
   return (
-    <View style={styles.container}>
-      <View style={styles.iconContainer}>
-        <Body style={styles.icon}>{icon}</Body>
-      </View>
+    <View style={[styles.container, compact && styles.containerCompact]}>
+      {iconName && (
+        <View style={[styles.iconContainer, compact && styles.iconContainerCompact]}>
+          <Feather 
+            name={iconName} 
+            size={compact ? 32 : 48} 
+            color={COLORS.textMuted} 
+          />
+        </View>
+      )}
       
-      <H3 style={styles.title}>{title}</H3>
-      <Body style={styles.message}>{message}</Body>
+      <H3 style={StyleSheet.flatten([styles.title, compact && styles.titleCompact])}>{title}</H3>
+      
+      {description && (
+        <Body style={StyleSheet.flatten([styles.description, compact && styles.descriptionCompact])}>
+          {description}
+        </Body>
+      )}
       
       {actionLabel && onAction && (
         <Button
           title={actionLabel}
           onPress={onAction}
           variant="primary"
+          size={compact ? 'small' : 'medium'}
           style={styles.button}
         />
       )}
@@ -48,26 +93,37 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: SPACING.xxxl,
+    paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.xxxl,
   },
-  iconContainer: {
-    marginBottom: SPACING.xl,
+  containerCompact: {
+    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
   },
-  icon: {
-    fontSize: 64,
+  iconContainer: {
+    marginBottom: SPACING.lg,
+  },
+  iconContainerCompact: {
+    marginBottom: SPACING.md,
   },
   title: {
     textAlign: 'center',
     marginBottom: SPACING.md,
     color: COLORS.text,
   },
-  message: {
+  titleCompact: {
+    marginBottom: SPACING.sm,
+  },
+  description: {
     textAlign: 'center',
     color: COLORS.textMuted,
-    marginBottom: SPACING.xxl,
+    marginBottom: SPACING.xl,
+  },
+  descriptionCompact: {
+    marginBottom: SPACING.md,
   },
   button: {
-    minWidth: 200,
+    minWidth: 160,
+    marginTop: SPACING.sm,
   },
 });

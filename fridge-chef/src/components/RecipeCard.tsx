@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { Recipe } from '@/types';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -33,12 +34,12 @@ export function RecipeCard({ recipe, onPress }: RecipeCardProps) {
           
           <View style={styles.metaRow}>
             <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>🕐</Text>
+              <Feather name="clock" size={16} color={COLORS.textSecondary} />
               <Text style={styles.metaText}>{totalTime} min</Text>
             </View>
             
             <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>🍽️</Text>
+              <Feather name="users" size={16} color={COLORS.textSecondary} />
               <Text style={styles.metaText}>{recipe.servings} servings</Text>
             </View>
             
@@ -49,11 +50,17 @@ export function RecipeCard({ recipe, onPress }: RecipeCardProps) {
                   ? 'success'
                   : recipe.difficulty === 'Medium'
                   ? 'warning'
-                  : 'error'
+                  : 'danger'
               }
               size="small"
             />
           </View>
+          
+          {recipe.missingOptional && recipe.missingOptional.length > 0 && (
+            <Text style={styles.missingOptional}>
+              Optional: {recipe.missingOptional.join(', ')}
+            </Text>
+          )}
           
           <View style={styles.tagsContainer}>
             {recipe.tags.slice(0, 3).map((tag) => (
@@ -105,12 +112,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.xs,
   },
-  metaLabel: {
-    fontSize: FONT_SIZES.md,
-  },
   metaText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
+  },
+  missingOptional: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+    fontStyle: 'italic',
   },
   tagsContainer: {
     flexDirection: 'row',

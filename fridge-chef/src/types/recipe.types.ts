@@ -1,8 +1,8 @@
 export interface Ingredient {
   id: string;
   name: string;
-  quantity: number;
-  unit: string; // 'g', 'ml', 'cup', 'tbsp', 'piece', etc.
+  quantity: number | null;
+  unit: string | null; // 'g', 'ml', 'cup', 'tbsp', 'piece', etc.
   category?: 'protein' | 'vegetable' | 'grain' | 'dairy' | 'spice' | 'other';
   isOptional?: boolean;
 }
@@ -51,6 +51,7 @@ export interface Recipe {
   cookTime: number;    // minutes
   difficulty: 'Easy' | 'Medium' | 'Hard';
   imageUri?: string;   // Original captured image
+  missingOptional?: string[]; // Optional ingredients user doesn't have (e.g., garnishes)
   createdAt: Date;
   updatedAt: Date;
 }

@@ -5,6 +5,7 @@ import { useScanSessionStore } from '@/store/scanSessionStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { useFridgeStore } from '@/store/fridgeStore';
 import { LLMRequest, LLMStreamChunk } from '@/types';
+import { getAvailableIngredientsWithScan } from '@/utils/ingredientAvailability';
 
 interface UseGenerateRecipeReturn {
   generateFromImage: (imageUri: string, options?: Partial<LLMRequest>) => Promise<void>;
@@ -46,6 +47,9 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
 
         updateStatus('analyzing');
 
+        // Get available ingredients (fridge + any scanned items)
+        const availableIngredients = getAvailableIngredientsWithScan();
+
         // Generate recipe
         const request: LLMRequest = {
           imageBase64: compressed.base64,
@@ -53,7 +57,7 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
           ...options,
         };
 
-        const response = await llmService.generateRecipeFromImage(request);
+        const response = await llmService.generateRecipeFromImage(request, availableIngredients);
 
         // Save recipe
         setGeneratedRecipe(response.recipe);
@@ -105,6 +109,9 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
 
         updateStatus('streaming');
 
+        // Get available ingredients (fridge + any scanned items)
+        const availableIngredients = getAvailableIngredientsWithScan();
+
         // Generate recipe with streaming
         const request: LLMRequest = {
           imageBase64: compressed.base64,
@@ -113,7 +120,7 @@ export function useGenerateRecipe(): UseGenerateRecipeReturn {
           ...options,
         };
 
-        const response = await llmService.generateRecipeStreamAsync(request, onChunk);
+        const response = await llmService.generateRecipeStreamAsync(request, onChunk, availableIngredients);
 
         // Save recipe
         setGeneratedRecipe(response.recipe);

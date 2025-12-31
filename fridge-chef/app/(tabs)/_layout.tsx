@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { COLORS } from '@/constants/theme';
 
 export default function TabsLayout() {
@@ -15,28 +15,36 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>🏠</Text>,
+          tabBarIcon: ({ color }) => (
+            <Feather name="home" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="fridge"
         options={{
           title: 'My Fridge',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>🧊</Text>,
+          tabBarIcon: ({ color }) => (
+            <Feather name="package" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="recipes"
         options={{
           title: 'Recipes',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📚</Text>,
+          tabBarIcon: ({ color }) => (
+            <Feather name="book-open" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>⚙️</Text>,
+          tabBarIcon: ({ color }) => (
+            <Feather name="settings" size={24} color={color} />
+          ),
         }}
       />
     </Tabs>

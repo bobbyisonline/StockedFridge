@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 import { useRecipeStore } from '@/store/recipeStore';
 import { IngredientList } from '@/components/IngredientList';
 import { RecipeSteps } from '@/components/features/RecipeSteps';
@@ -21,11 +22,12 @@ import { H1, H2, Body, Caption } from '@/components/ui/Typography';
 import { Divider } from '@/components/ui/Divider';
 
 export default function RecipeDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, fromGeneration } = useLocalSearchParams<{ id: string; fromGeneration?: string }>();
   const router = useRouter();
   const { getRecipeById, deleteRecipe } = useRecipeStore();
 
   const recipe = id ? getRecipeById(id) : undefined;
+  const isPreviewMode = fromGeneration === 'true';
 
   const handleShare = async () => {
     if (!recipe) return;
@@ -39,6 +41,21 @@ export default function RecipeDetailScreen() {
     } catch (error) {
       console.error('Error sharing recipe:', error);
     }
+  };
+
+  const handleBackToList = () => {
+    if (!recipe) return;
+    
+    // Delete the preview recipe
+    deleteRecipe(recipe.id);
+    router.back();
+  };
+
+  const handleSaveRecipe = () => {
+    if (!recipe) return;
+    
+    // Recipe is already saved, just go back to list
+    router.push('/(tabs)/recipes');
   };
 
   const handleDelete = () => {
@@ -101,19 +118,25 @@ export default function RecipeDetailScreen() {
         {/* Stats Cards */}
         <View style={styles.statsRow}>
           <Card style={styles.statCard} variant="filled" padding="small">
-            <Caption style={styles.statIcon}>⏱️</Caption>
+            <View style={styles.statIconContainer}>
+              <Feather name="clock" size={20} color={COLORS.primary} />
+            </View>
             <Body style={styles.statValue}>{totalTime} min</Body>
             <Caption>Time</Caption>
           </Card>
 
           <Card style={styles.statCard} variant="filled" padding="small">
-            <Caption style={styles.statIcon}>🍽️</Caption>
+            <View style={styles.statIconContainer}>
+              <Feather name="users" size={20} color={COLORS.primary} />
+            </View>
             <Body style={styles.statValue}>{recipe.servings}</Body>
             <Caption>Servings</Caption>
           </Card>
 
           <Card style={styles.statCard} variant="filled" padding="small">
-            <Caption style={styles.statIcon}>📊</Caption>
+            <View style={styles.statIconContainer}>
+              <Feather name="bar-chart-2" size={20} color={COLORS.primary} />
+            </View>
             <Body style={styles.statValue}>{recipe.difficulty}</Body>
             <Caption>Difficulty</Caption>
           </Card>
@@ -162,20 +185,41 @@ export default function RecipeDetailScreen() {
 
         {/* Bottom Actions */}
         <View style={styles.actions}>
-          <Button
-            title="Share Recipe"
-            onPress={handleShare}
-            variant="primary"
-            fullWidth
-          />
-          
-          <Button
-            title="Delete Recipe"
-            onPress={handleDelete}
-            variant="outline"
-            fullWidth
-            style={styles.deleteButton}
-          />
+          {isPreviewMode ? (
+            <>
+              <Button
+                title="Save Recipe"
+                onPress={handleSaveRecipe}
+                variant="primary"
+                fullWidth
+              />
+              
+              <Button
+                title="Back to List"
+                onPress={handleBackToList}
+                variant="outline"
+                fullWidth
+                style={styles.deleteButton}
+              />
+            </>
+          ) : (
+            <>
+              <Button
+                title="Share Recipe"
+                onPress={handleShare}
+                variant="primary"
+                fullWidth
+              />
+              
+              <Button
+                title="Delete Recipe"
+                onPress={handleDelete}
+                variant="outline"
+                fullWidth
+                style={styles.deleteButton}
+              />
+            </>
+          )}
         </View>
       </ScrollView>
     </Screen>
@@ -221,9 +265,7 @@ const styles = StyleSheet.create({
     minHeight: 88,
     justifyContent: 'center',
   },
-  statIcon: {
-    fontSize: 28,
-    lineHeight: 32,
+  statIconContainer: {
     marginBottom: SPACING.xs,
   },
   statValue: {

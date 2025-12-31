@@ -6,6 +6,9 @@ CRITICAL RULES:
 2. If no food visible, return: {"error": "NO_FOOD_DETECTED", "message": "No food found"}
 3. Keep recipes concise: 3-5 steps maximum.
 4. Estimate quantities based on visuals.
+5. **STRICT CONSTRAINT**: Recipe ingredients MUST ONLY use items explicitly provided in availableIngredients list.
+6. If a recipe would benefit from an optional ingredient (garnish, seasoning) NOT in availableIngredients, list it separately in "missingOptional" field.
+7. The recipe MUST be completable without any missingOptional items.
 
 JSON SCHEMA:
 {
@@ -13,7 +16,7 @@ JSON SCHEMA:
   "description": "string (1-2 sentences)",
   "ingredients": [{
     "id": "string (uuid)",
-    "name": "string",
+    "name": "string (MUST be from availableIngredients)",
     "quantity": number,
     "unit": "g|ml|cup|tbsp|tsp|piece",
     "category": "protein|vegetable|grain|dairy|spice|other",
@@ -31,10 +34,11 @@ JSON SCHEMA:
   "cookTime": number,
   "difficulty": "Easy"|"Medium"|"Hard",
   "detectedItems": ["string"],
+  "missingOptional": ["string (optional ingredients NOT in availableIngredients)"],
   "confidence": number
 }
 
-Generate a practical recipe!`,
+Generate a practical recipe using ONLY the available ingredients!`,
 
   INGREDIENT_DETECTION: `You are a food recognition AI. Analyze the image and list ALL visible food ingredients.
 
@@ -55,32 +59,33 @@ RULES:
 4. Preserve the overall cooking method if possible.
 5. Update tags to reflect the modifications.`,
 
-  INGREDIENT_RECOMMENDATIONS: `You are a culinary advisor helping users optimize their fridge inventory. Analyze the current ingredients and recommend complementary items to purchase.
+  INGREDIENT_RECOMMENDATIONS: `You are a culinary advisor helping users optimize their grocery shopping. Analyze the current fridge inventory and recommend MISSING ingredients they should purchase.
 
 CRITICAL RULES:
 1. Respond ONLY with valid JSON. No markdown, no code blocks.
-2. Recommend 5-8 ingredients that would unlock the most recipe possibilities.
-3. Focus on versatile, commonly available ingredients.
+2. Recommend 5-8 ingredients that the user DOES NOT HAVE but should consider buying.
+3. Focus on versatile, commonly available items that unlock many recipe possibilities.
 4. Consider variety: proteins, vegetables, seasonings, staples.
 5. Explain which types of recipes each recommendation enables.
-6. List 3-5 specific recipes that would become possible with these additions.
+6. List 3-5 specific recipes that would become possible AFTER purchasing these items.
+7. DO NOT recommend items the user already has in their fridge.
 
 JSON SCHEMA:
 {
   "recommendations": [{
-    "ingredient": "string (specific item name)",
+    "ingredient": "string (specific item name - something they DON'T have)",
     "category": "protein|vegetable|grain|dairy|spice|other",
     "priority": "high"|"medium"|"low",
-    "reasoning": "string (1-2 sentences explaining why this helps)",
-    "unlocksRecipes": ["string (recipe types)"]
+    "reasoning": "string (1-2 sentences explaining why purchasing this helps)",
+    "unlocksRecipes": ["string (recipe types that become possible)"]
   }],
-  "summary": "string (2-3 sentence overview of strategy)",
-  "currentStrengths": ["string (what you already have good coverage of)"],
-  "gaps": ["string (what categories you're missing)"],
-  "possibleRecipes": ["string (3-5 specific recipe names that become possible)"]
+  "summary": "string (2-3 sentence overview of what purchasing these items enables)",
+  "currentStrengths": ["string (what categories they already have good coverage of)"],
+  "gaps": ["string (what categories they're missing that these recommendations fill)"],
+  "possibleRecipes": ["string (3-5 specific recipe names that become possible AFTER purchasing)"]
 }
 
-Provide practical, actionable recommendations!`
+Provide practical shopping recommendations for ingredients they're MISSING!`
 };
 
 export const ERROR_MESSAGES = {

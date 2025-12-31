@@ -47,8 +47,8 @@ export function validateIngredient(ingredient: any): ingredient is Ingredient {
     ingredient &&
     typeof ingredient.id === 'string' &&
     typeof ingredient.name === 'string' &&
-    typeof ingredient.quantity === 'number' &&
-    typeof ingredient.unit === 'string' &&
+    (typeof ingredient.quantity === 'number' || ingredient.quantity === null) &&
+    (typeof ingredient.unit === 'string' || ingredient.unit === null) &&
     ingredient.name.length > 0
   );
 }
@@ -95,4 +95,60 @@ export function isValidJSON(str: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Validates that recipe only uses available ingredients
+ * @param recipe - Recipe to validate
+ * @param availableIngredients - List of ingredients user has
+ * @returns Object with validation result and violations
+ */
+export function validateRecipeUsesOnlyAvailableIngredients(
+  recipe: Recipe,
+  availableIngredients: string[]
+): {
+  isValid: boolean;
+  violations: string[];
+  validIngredients: Ingredient[];
+} {
+  const normalizedAvailable = availableIngredients.map(i => 
+    i.toLowerCase().trim().replace(/s$/, '').replace(/[^\w\s]/g, '')
+  );
+  
+  const violations: string[] = [];
+  const validIngredients: Ingredient[] = [];
+  
+  recipe.ingredients.forEach(ingredient => {
+    const normalizedName = ingredient.name
+      .toLowerCase()
+      .trim()
+      .replace(/s$/, '')
+      .replace(/[^\w\s]/g, '');
+    
+    // Check if ingredient matches any available ingredient
+    const isAvailable = normalizedAvailable.some(available => {
+      // Exact match
+      if (normalizedName === available) return true;
+      
+      // One contains the other (e.g., "tomato" matches "cherry tomatoes")
+      if (normalizedName.includes(available) || available.includes(normalizedName)) {
+        return true;
+      }
+      
+      return false;
+    });
+    
+    if (isAvailable) {
+      validIngredients.push(ingredient);
+    } else if (!ingredient.isOptional) {
+      // Only flag violations for non-optional ingredients
+      violations.push(ingredient.name);
+    }
+  });
+  
+  return {
+    isValid: violations.length === 0,
+    violations,
+    validIngredients,
+  };
 }

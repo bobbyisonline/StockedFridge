@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Text, Image } from 'react-native';
 import { useScanSessionStore } from '@/store/scanSessionStore';
 import { CameraCapture } from '@/components/features/CameraCapture';
-import { ImagePreview } from '@/components/features/ImagePreview';
+import { IngredientReviewScreen } from '@/components/features/IngredientReviewScreen';
 import { RecipeGenerator } from '@/components/features/RecipeGenerator';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, LAYOUT } from '@/constants/theme';
@@ -14,12 +14,18 @@ import { Card } from '@/components/ui/Card';
 export default function HomeScreen() {
   const router = useRouter();
   const { currentSession, startSession, resetSession } = useScanSessionStore();
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | string[] | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleImageCaptured = (uri: string, base64: string) => {
     setCapturedImage(uri);
     startSession(uri);
+  };
+
+  const handleMultipleImagesCaptured = (images: Array<{ uri: string; base64: string }>) => {
+    const uris = images.map(img => img.uri);
+    setCapturedImage(uris);
+    startSession(uris[0]); // Use first image for session tracking
   };
 
   const handleRetake = () => {
@@ -28,7 +34,14 @@ export default function HomeScreen() {
     setIsGenerating(false);
   };
 
-  const handleConfirm = () => {
+  const handleTakeAnother = () => {
+    // Reset to capture mode but keep session for potential recipe generation
+    setCapturedImage(null);
+    setIsGenerating(false);
+  };
+
+  const handleGenerateRecipes = () => {
+    // Start recipe generation flow
     setIsGenerating(true);
   };
 
@@ -39,14 +52,15 @@ export default function HomeScreen() {
     }
   };
 
-  // Show preview state
+  // Show ingredient review state (post-photo)
   if (capturedImage && !isGenerating) {
     return (
       <Screen padding={false}>
-        <ImagePreview
+        <IngredientReviewScreen
           imageUri={capturedImage}
           onRetake={handleRetake}
-          onConfirm={handleConfirm}
+          onTakeAnother={handleTakeAnother}
+          onGenerateRecipes={handleGenerateRecipes}
         />
       </Screen>
     );
@@ -54,10 +68,11 @@ export default function HomeScreen() {
 
   // Show loading/generating state
   if (isGenerating && capturedImage) {
+    const firstImageUri = Array.isArray(capturedImage) ? capturedImage[0] : capturedImage;
     return (
       <Screen padding={false}>
         <RecipeGenerator
-          imageUri={capturedImage}
+          imageUri={firstImageUri}
           onComplete={handleGenerationComplete}
         />
       </Screen>
@@ -87,6 +102,7 @@ export default function HomeScreen() {
         <View style={styles.actions}>
           <CameraCapture
             onImageCaptured={handleImageCaptured}
+            onMultipleImagesCaptured={handleMultipleImagesCaptured}
             disabled={isGenerating}
           />
         </View>

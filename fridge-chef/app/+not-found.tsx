@@ -1,5 +1,6 @@
 import { Link, Stack } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES } from '@/constants/theme';
 
 export default function NotFoundScreen() {
@@ -7,7 +8,9 @@ export default function NotFoundScreen() {
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
       <View style={styles.container}>
-        <Text style={styles.icon}>🤔</Text>
+        <View style={styles.iconContainer}>
+          <Feather name="alert-circle" size={64} color={COLORS.textMuted} />
+        </View>
         <Text style={styles.title}>This screen doesn't exist.</Text>
         <Link href="/" style={styles.link}>
           <Text style={styles.linkText}>Go to home screen</Text>
@@ -25,8 +28,7 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
     backgroundColor: COLORS.background,
   },
-  icon: {
-    fontSize: 64,
+  iconContainer: {
     marginBottom: SPACING.lg,
   },
   title: {
