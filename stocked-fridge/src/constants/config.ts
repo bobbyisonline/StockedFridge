@@ -9,7 +9,7 @@ export const API_CONFIG = {
   OPENAI_MODEL: 'gpt-4o', // GPT-4 with vision capabilities
   
   // Gemini Configuration
-  GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'AIzaSyCdZuwhEY-ySbqrNoBGEn3QxJCNB4ZVf6Q',
+  GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY || '',
   GEMINI_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta',
   GEMINI_MODEL: 'models/gemini-2.5-flash-lite', // Fastest free model
   
