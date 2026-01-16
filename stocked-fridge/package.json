@@ -1,5 +1,5 @@
 {
-  "name": "fridge-chef",
+  "name": "stocked-fridge",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "private": true,
@@ -45,6 +45,6 @@
   "jest": {
     "preset": "jest-expo"
   },
-  "homepage": "https://github.com/yourusername/fridge-chef",
+  "homepage": "https://github.com/bobbyisonline/FridgeChef",
   "license": "MIT"
 }

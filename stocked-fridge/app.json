@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "StockedFridge",
-    "slug": "fridge-chef",
+    "slug": "stocked-fridge",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/adaptive-icon.png",
@@ -19,7 +19,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fridgechef.app",
+      "bundleIdentifier": "com.stockedfridge.app",
       "infoPlist": {
         "NSCameraUsageDescription": "This app needs access to your camera to capture photos of your ingredients.",
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select ingredient photos."
@@ -30,7 +30,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#10B981"
       },
-      "package": "com.fridgechef.app",
+      "package": "com.stockedfridge.app",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -56,7 +56,7 @@
         }
       ]
     ],
-    "scheme": "fridgechef",
+    "scheme": "stockedfridge",
     "extra": {
       "router": {
         "origin": false

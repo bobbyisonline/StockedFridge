@@ -60,7 +60,7 @@ StockedFridge is an Expo-based mobile application (iOS/Android) that helps you m
 ### Project Structure
 
 ```
-fridge-chef/
+stocked-fridge/
 ├── app/                              # Expo Router file-based routing
 │   ├── (tabs)/                       # Tab navigation
 │   │   ├── index.tsx                 # Home - Camera & scan flow
@@ -144,7 +144,7 @@ Take Photo → AI Detects & Generates Recipe → Review → Save to Library
 1. **Clone the repository**
    ```bash
    git clone https://github.com/yourusername/fridge-chef.git
-   cd fridge-chef
+   cd stocked-fridge
    ```
 
 2. **Install dependencies**
