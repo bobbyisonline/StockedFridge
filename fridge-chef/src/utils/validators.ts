@@ -1,5 +1,6 @@
 import { Recipe, Ingredient, RecipeStep } from '@/types';
 import { VALIDATION } from '@/constants/config';
+import { isPantryStaple } from './culinaryRules';
 
 /**
  * Validates a recipe object structure
@@ -125,6 +126,12 @@ export function validateRecipeUsesOnlyAvailableIngredients(
       .replace(/s$/, '')
       .replace(/[^\w\s]/g, '');
     
+    // Pantry staples are always allowed
+    if (isPantryStaple(ingredient.name)) {
+      validIngredients.push(ingredient);
+      return;
+    }
+
     // Check if ingredient matches any available ingredient
     const isAvailable = normalizedAvailable.some(available => {
       // Exact match

@@ -1,5 +1,5 @@
 import { SYSTEM_PROMPTS } from '@/constants/prompts';
-import { getCulinaryRulesPrompt } from './culinaryRules';
+import { getCulinaryRulesPrompt, ALLOWED_PANTRY_STAPLES } from './culinaryRules';
 
 export type PromptType = 'recipe' | 'ingredients' | 'refinement' | 'recommendations';
 
@@ -36,8 +36,9 @@ export function buildSystemPrompt(
 
   // Add available ingredients constraint for recipe generation
   if (type === 'recipe' && options?.availableIngredients && options.availableIngredients.length > 0) {
-    basePrompt += `\n\n**AVAILABLE INGREDIENTS (STRICT - USE ONLY THESE):**\n${options.availableIngredients.join(', ')}`;
-    
+    basePrompt += `\n\n**AVAILABLE INGREDIENTS (USE ONLY THESE + PANTRY STAPLES BELOW):**\n${options.availableIngredients.join(', ')}`;
+    basePrompt += `\n\n**PANTRY STAPLES (ALWAYS ALLOWED):**\n${ALLOWED_PANTRY_STAPLES.join(', ')}`;
+
     // Add culinary rules for recipe generation
     basePrompt += `\n\n${getCulinaryRulesPrompt()}`;
   }

@@ -24,14 +24,15 @@ export type RecipeCategory = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'desse
 export const INGREDIENT_CATEGORIES: Record<string, IngredientCategory> = {
   // Sweet/Dessert
   'yogurt': 'sweet-dessert',
-  'honey': 'sweet-dessert',
+  // Sweet condiments (allowed in savory dishes)
+  'honey': 'condiment-sweet',
   'sugar': 'sweet-dessert',
   'chocolate': 'sweet-dessert',
   'granola': 'sweet-dessert',
-  'maple syrup': 'sweet-dessert',
-  'jam': 'sweet-dessert',
-  'vanilla': 'sweet-dessert',
-  'cinnamon': 'sweet-dessert',
+  'maple syrup': 'condiment-sweet',
+  'jam': 'condiment-sweet',
+  'vanilla': 'condiment-sweet',
+  'cinnamon': 'condiment-sweet',
   'nutella': 'sweet-dessert',
   'whipped cream': 'sweet-dessert',
   'ice cream': 'sweet-dessert',
@@ -93,11 +94,17 @@ export const INGREDIENT_CATEGORIES: Record<string, IngredientCategory> = {
   'salsa': 'condiment-savory',
   'ranch': 'condiment-savory',
   'vinegar': 'condiment-savory',
+  // Additional savory condiments
+  'chili crisp': 'condiment-savory',
+  'spicy chili crisp': 'condiment-savory',
+  'marinara sauce': 'condiment-savory',
   
   // Neutral Grains
   'bread': 'grain-neutral',
   'rice': 'grain-neutral',
   'pasta': 'grain-neutral',
+  'spaghetti': 'grain-neutral',
+  'edamame spaghetti': 'grain-neutral',
   'tortilla': 'grain-neutral',
   'oats': 'grain-neutral',
   'quinoa': 'grain-neutral',
@@ -133,6 +140,10 @@ export const INGREDIENT_CATEGORIES: Record<string, IngredientCategory> = {
   'chili powder': 'spice-neutral',
   'ginger': 'spice-neutral',
   'turmeric': 'spice-neutral',
+  'red pepper flakes': 'spice-neutral',
+  // Additional sweet condiments
+  'hot honey': 'condiment-sweet',
+  'hot honey chilies': 'condiment-sweet',
 };
 
 /**
@@ -166,15 +177,8 @@ export function categorizeIngredient(ingredient: string): IngredientCategory {
  * Incompatible category combinations
  */
 const INCOMPATIBLE_COMBINATIONS: Array<[IngredientCategory[], IngredientCategory[]]> = [
-  // Savory condiments NEVER in sweet dishes
+  // Savory condiments NEVER in sweet desserts
   [['condiment-savory'], ['sweet-dessert']],
-  [['condiment-savory'], ['fruit']],
-  
-  // Savory proteins RARELY in pure desserts (unless explicitly savory-sweet like bacon desserts)
-  [['savory-protein'], ['sweet-dessert']],
-  
-  // Savory vegetables NOT in desserts
-  [['savory-vegetable'], ['sweet-dessert']],
 ];
 
 /**

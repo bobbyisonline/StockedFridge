@@ -125,8 +125,8 @@ export default function HomeScreen() {
             <View style={styles.step}>
               <Text style={styles.stepNumber}>2</Text>
               <View style={styles.stepContent}>
-                <Body style={styles.stepTitle}>AI Creates Recipe</Body>
-                <Caption>Our AI generates a custom recipe instantly</Caption>
+                <Body style={styles.stepTitle}>Assistant Creates Recipe</Body>
+                <Caption>Our assistant generates a custom recipe instantly</Caption>
               </View>
             </View>
           </Card>

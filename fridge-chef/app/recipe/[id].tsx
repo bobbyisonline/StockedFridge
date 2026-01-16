@@ -54,7 +54,7 @@ export default function RecipeDetailScreen() {
   const handleSaveRecipe = () => {
     if (!recipe) return;
     
-    // Recipe is already saved, just go back to list
+    // Recipe is already in store (added for preview), just navigate to recipes list
     router.push('/(tabs)/recipes');
   };
 

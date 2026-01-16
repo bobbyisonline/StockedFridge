@@ -1,4 +1,4 @@
-// Design System - "Modern Grocery + AI Assistant"
+// Design System - "Modern Grocery + Recipe Assistant"
 // High contrast, warm neutrals, clean hierarchy
 
 export const COLORS = {

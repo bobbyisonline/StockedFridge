@@ -187,7 +187,7 @@ export function IngredientReviewScreen({
         <View style={styles.content}>
           {/* Success Icon */}
           <View style={styles.successIconContainer}>
-            <Body style={styles.successIcon}>✓</Body>
+            <Feather name="check-circle" size={64} color={COLORS.success} />
           </View>
 
           <H2 style={styles.successTitle}>Added to Your Fridge!</H2>
@@ -535,19 +535,10 @@ const styles = StyleSheet.create({
 
   // Success State
   successIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.successMuted,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
     marginBottom: SPACING.lg,
-  },
-  successIcon: {
-    fontSize: 48,
-    color: COLORS.success,
-    fontWeight: '600',
   },
   successTitle: {
     textAlign: 'center',

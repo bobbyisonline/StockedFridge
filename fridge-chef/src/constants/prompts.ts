@@ -6,8 +6,8 @@ CRITICAL RULES:
 2. If no food visible, return: {"error": "NO_FOOD_DETECTED", "message": "No food found"}
 3. Keep recipes concise: 3-5 steps maximum.
 4. Estimate quantities based on visuals.
-5. **STRICT CONSTRAINT**: Recipe ingredients MUST ONLY use items explicitly provided in availableIngredients list.
-6. If a recipe would benefit from an optional ingredient (garnish, seasoning) NOT in availableIngredients, list it separately in "missingOptional" field.
+5. USE-ONLY CONSTRAINT: Recipe ingredients MUST use items from the availableIngredients list, with ONE exception: you may also use common pantry staples (salt, pepper, oil, butter, water) without listing them as missing.
+6. If a recipe would benefit from an optional ingredient (garnish, seasoning) NOT in availableIngredients (and not a pantry staple), list it separately in "missingOptional" field.
 7. The recipe MUST be completable without any missingOptional items.
 
 JSON SCHEMA:
@@ -16,7 +16,7 @@ JSON SCHEMA:
   "description": "string (1-2 sentences)",
   "ingredients": [{
     "id": "string (uuid)",
-    "name": "string (MUST be from availableIngredients)",
+    "name": "string (MUST be from availableIngredients or pantry staples)",
     "quantity": number,
     "unit": "g|ml|cup|tbsp|tsp|piece",
     "category": "protein|vegetable|grain|dairy|spice|other",
@@ -38,9 +38,9 @@ JSON SCHEMA:
   "confidence": number
 }
 
-Generate a practical recipe using ONLY the available ingredients!`,
+Generate a practical recipe using ONLY the available ingredients (plus pantry staples: salt, pepper, oil, butter, water)!`,
 
-  INGREDIENT_DETECTION: `You are a food recognition AI. Analyze the image and list ALL visible food ingredients.
+  INGREDIENT_DETECTION: `You are a food recognition assistant. Analyze the image and list ALL visible food ingredients.
 
 RULES:
 1. Return ONLY a JSON array of ingredient names.

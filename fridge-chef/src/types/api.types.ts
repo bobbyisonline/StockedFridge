@@ -12,7 +12,7 @@ export interface LLMRequest {
 export interface LLMResponse {
   recipe: Recipe;
   confidence: number;          // 0-1 score
-  detectedItems: string[];     // What the AI "saw"
+  detectedItems: string[];     // What the model "saw"
   warnings?: string[];         // e.g., "Some ingredients unclear"
 }
 

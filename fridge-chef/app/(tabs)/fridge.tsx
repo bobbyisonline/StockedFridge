@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { Feather } from '@expo/vector-icons';
 import { useFridgeStore } from '@/store/fridgeStore';
 import { useRecipeStore } from '@/store/recipeStore';
 import { FridgeItem, FridgeRecommendations } from '@/types/fridge.types';
@@ -17,6 +18,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Card } from '@/components/ui/Card';
 import { LLMService } from '@/services/LLMService';
 import { SuggestionsSheet, SuggestionsSheetRef } from '@/components/features/SuggestionsSheet';
+import { AddIngredientModal } from '@/components/features/AddIngredientModal';
 import { COLORS, SPACING, LAYOUT, BORDER_RADIUS } from '@/constants/theme';
 import { Screen } from '@/components/ui/Screen';
 import { H1, H2, Body, Caption } from '@/components/ui/Typography';
@@ -26,7 +28,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ListRow } from '@/components/ui/ListRow';
 
 export default function FridgeScreen() {
-  const { items, isLoading, loadItems, removeItem, clearAll } = useFridgeStore();
+  const { items, isLoading, loadItems, removeItem, clearAll, addItem } = useFridgeStore();
+  const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [recommendations, setRecommendations] = useState<FridgeRecommendations | null>(null);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
@@ -40,7 +43,7 @@ export default function FridgeScreen() {
   // Present the bottom sheet when recommendations become available
   useEffect(() => {
     if (recommendations) {
-      console.log('[AI] Presenting SuggestionsSheet. items:', recommendations.recommendations.length, 'recipes:', recommendations.possibleRecipes?.length ?? 0);
+      console.log('[Assistant] Presenting SuggestionsSheet. items:', recommendations.recommendations.length, 'recipes:', recommendations.possibleRecipes?.length ?? 0);
       sheetRef.current?.present();
     }
   }, [recommendations]);
@@ -55,9 +58,9 @@ export default function FridgeScreen() {
     try {
       const llmService = new LLMService();
       const ingredientNames = items.map(item => item.name);
-      console.log('[AI] Fetching recommendations for:', ingredientNames);
+      console.log('[Assistant] Fetching recommendations for:', ingredientNames);
       const result = await llmService.getIngredientRecommendations(ingredientNames);
-      console.log('[AI] Recommendations received. items:', result.recommendations.length, 'recipes:', result.possibleRecipes?.length ?? 0);
+      console.log('[Assistant] Recommendations received. items:', result.recommendations.length, 'recipes:', result.possibleRecipes?.length ?? 0);
       setRecommendations(result);
     } catch (error) {
       Alert.alert('Error', 'Failed to get recommendations. Please try again.');
@@ -90,29 +93,33 @@ export default function FridgeScreen() {
 
   const handleSelectRecipe = async (recipeName: string) => {
     if (generatingRecipe) {
-      console.log('[AI] Recipe generation already in progress, ignoring tap');
+      console.log('[Assistant] Recipe generation already in progress, ignoring tap');
       return;
     }
 
-    console.log('[AI] Recipe selected:', recipeName);
+    console.log('[Assistant] Recipe selected:', recipeName);
     
-    // Generate a full recipe from the fridge items + recipe name
+    // Generate a full recipe from the fridge items + recommended ingredients
     setGeneratingRecipe(recipeName);
     try {
       const llmService = new LLMService();
       const ingredientNames = items.map(item => item.name);
       
-      console.log('[AI] Generating full recipe for:', recipeName, 'with ingredients:', ingredientNames);
-      const recipe = await llmService.generateRecipeFromName(recipeName, ingredientNames);
+      // Include recommended ingredients so the model can use them in the recipe
+      const recommendedIngredients = recommendations?.recommendations.map(rec => rec.ingredient) || [];
+      const allAvailableIngredients = [...ingredientNames, ...recommendedIngredients];
       
-      // Save to recipe store
+      console.log('[Assistant] Generating full recipe for:', recipeName, 'with ingredients:', allAvailableIngredients);
+      const recipe = await llmService.generateRecipeFromName(recipeName, allAvailableIngredients);
+      
+      // Temporarily store recipe for preview (not saved to main list yet)
       const { addRecipe } = useRecipeStore.getState();
       await addRecipe(recipe);
       
-      // Navigate to recipe detail using the generated recipe ID
-      router.push(`/recipe/${recipe.id}` as any);
+      // Navigate to recipe detail with fromGeneration flag (don't dismiss sheet so it's there on back)
+      router.push(`/recipe/${recipe.id}?fromGeneration=true`);
     } catch (error) {
-      console.error('[AI] Recipe generation error:', error);
+      console.error('[Assistant] Recipe generation error:', error);
       Alert.alert('Error', 'Failed to generate recipe. Please try again.');
     } finally {
       setGeneratingRecipe(null);
@@ -183,11 +190,19 @@ export default function FridgeScreen() {
           <H1>My Fridge</H1>
           <Caption style={styles.subtitle}>Track what you have on hand</Caption>
         </View>
-        {items.length > 0 && (
-          <TouchableOpacity onPress={handleClearAll}>
-            <Caption style={styles.clearButton}>Clear All</Caption>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            onPress={() => setShowAddModal(true)}
+            style={styles.addButton}
+          >
+            <Feather name="plus-circle" size={28} color={COLORS.primary} />
           </TouchableOpacity>
-        )}
+          {items.length > 0 && (
+            <TouchableOpacity onPress={handleClearAll}>
+              <Caption style={styles.clearButton}>Clear All</Caption>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Search */}
@@ -200,12 +215,12 @@ export default function FridgeScreen() {
         containerStyle={styles.searchField}
       />
 
-      {/* AI Suggestions Card */}
+      {/* Assistant Suggestions Card */}
       {items.length > 0 && (
         <Card style={styles.aiCard} variant="filled">
           <View style={styles.aiCardContent}>
             <View style={styles.aiCardText}>
-              <Body style={styles.aiCardTitle}>AI Shopping Suggestions</Body>
+              <Body style={styles.aiCardTitle}>Shopping Suggestions</Body>
               <Caption>See ingredients you don't have that would unlock more meals</Caption>
             </View>
           </View>
@@ -222,15 +237,27 @@ export default function FridgeScreen() {
 
       {/* Items List or Empty State */}
       {filteredItems.length === 0 ? (
-        <EmptyState
-          iconName={searchQuery ? 'search' : 'archive'}
-          title={searchQuery ? 'No items found' : 'Your fridge is empty'}
-          description={
-            searchQuery
-              ? 'Try a different search term'
-              : 'Scan ingredients to add them to your fridge'
-          }
-        />
+        <View style={styles.emptyContainer}>
+          <EmptyState
+            iconName={searchQuery ? 'search' : 'archive'}
+            title={searchQuery ? 'No items found' : 'Your fridge is empty'}
+            description={
+              searchQuery
+                ? 'Try a different search term'
+                : 'Add ingredients to get started'
+            }
+          />
+          {!searchQuery && (
+            <View style={styles.emptyActions}>
+              <Button
+                title="Add Ingredient"
+                onPress={() => setShowAddModal(true)}
+                variant="primary"
+                size="medium"
+              />
+            </View>
+          )}
+        </View>
       ) : (
         <>
           <Caption style={styles.itemCount}>
@@ -246,16 +273,25 @@ export default function FridgeScreen() {
         </>
       )}
 
-      {/* AI Suggestions Sheet */}
+      {/* Assistant Suggestions Sheet */}
       <SuggestionsSheet
         ref={sheetRef}
         recommendations={recommendations}
         onClose={() => {
-          console.log('[AI] Sheet closed. Clearing recommendations.');
+          console.log('[Assistant] Sheet closed. Clearing recommendations.');
           setRecommendations(null);
         }}
         onShare={handleShareShoppingList}
-        onSelectRecipe={handleSelectRecipe}        generatingRecipe={generatingRecipe}      />
+        onSelectRecipe={handleSelectRecipe}
+        generatingRecipe={generatingRecipe}
+      />
+
+      {/* Add Ingredient Modal */}
+      <AddIngredientModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={addItem}
+      />
     </Screen>
   );
 }
@@ -269,6 +305,14 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  addButton: {
+    padding: SPACING.xs,
   },
   subtitle: {
     marginTop: SPACING.xs,
@@ -300,6 +344,13 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: SPACING.xxl,
+  },
+  emptyContainer: {
+    flex: 1,
+  },
+  emptyActions: {
+    paddingHorizontal: SPACING.xxl,
+    marginTop: SPACING.xl,
   },
   swipeDeleteContainer: {
     backgroundColor: COLORS.danger,

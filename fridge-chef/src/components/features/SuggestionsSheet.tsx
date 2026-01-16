@@ -70,7 +70,7 @@ export const SuggestionsSheet = forwardRef<SuggestionsSheetRef, SuggestionsSheet
     }));
 
     const handleSheetChanges = useCallback((index: number) => {
-      console.log('[AI] BottomSheet onChange index:', index);
+      console.log('[Assistant] BottomSheet onChange index:', index);
       if (index === -1) {
         onClose();
       }
@@ -136,7 +136,7 @@ export const SuggestionsSheet = forwardRef<SuggestionsSheetRef, SuggestionsSheet
         snapPoints={snapPoints}
         onChange={handleSheetChanges}
         onDismiss={() => {
-          console.log('[AI] BottomSheet onDismiss');
+          console.log('[Assistant] BottomSheet onDismiss');
           onClose();
         }}
         backdropComponent={renderBackdrop}
@@ -153,7 +153,7 @@ export const SuggestionsSheet = forwardRef<SuggestionsSheetRef, SuggestionsSheet
         <View style={styles.header}>
           {/* Title + Close */}
           <View style={styles.titleRow}>
-            <H2 style={styles.title}>AI Suggestions</H2>
+            <H2 style={styles.title}>Smart Suggestions</H2>
             <Pressable 
               onPress={() => { bottomSheetRef.current?.dismiss(); onClose(); }} 
               style={styles.closeButton}
@@ -194,11 +194,14 @@ export const SuggestionsSheet = forwardRef<SuggestionsSheetRef, SuggestionsSheet
         {/* FIXED: Use BottomSheetFlatList for proper scrolling */}
         <BottomSheetFlatList
           data={listData}
-          keyExtractor={(item: any, index: number) => 
-            activeTab === 'shopping' ? `ingredient-${index}` : `recipe-${index}`
+          keyExtractor={(item: any, index: number) =>
+            activeTab === 'shopping'
+              ? `ingredient-${item.ingredient?.toString().toLowerCase() || index}`
+              : `recipe-${item.toString().toLowerCase().trim()}`
           }
           renderItem={renderItem}
           ListEmptyComponent={renderEmptyList}
+          extraData={generatingRecipe}
           ListFooterComponent={activeTab === 'shopping' ? (
             <View style={[styles.footerContainer, { paddingBottom: insets.bottom + SPACING.md }]}>
               <Button

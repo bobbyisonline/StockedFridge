@@ -2,7 +2,7 @@ import { LLMRequest, LLMResponse, LLMStreamChunk, Recipe, ScanError } from '@/ty
 import { API_CONFIG } from '@/constants/config';
 import { buildSystemPrompt, PromptOptions } from '@/utils/promptBuilder';
 import { sanitizeJSONResponse, validateRecipe } from '@/utils/validators';
-import { validateRecipeIngredients, getCulinaryRulesPrompt, RecipeCategory } from '@/utils/culinaryRules';
+import { validateRecipeIngredients, getCulinaryRulesPrompt, RecipeCategory, ALLOWED_PANTRY_STAPLES } from '@/utils/culinaryRules';
 
 export interface ILLMService {
   generateRecipeFromImage(request: LLMRequest, availableIngredients?: string[]): Promise<LLMResponse>;
@@ -264,9 +264,15 @@ export class LLMService implements ILLMService {
     try {
       const prompt = buildSystemPrompt('recipe', { availableIngredients }) + `
 
-Generate a complete recipe for: "${recipeName}"
+CRITICAL: Generate EXACTLY the recipe requested below. The title MUST match precisely.
 
-The recipe MUST use ONLY ingredients from the available ingredients list provided above.
+Recipe to generate: "${recipeName}"
+
+IMPORTANT RULES:
+1. The recipe MUST be for "${recipeName}" specifically - not a similar dish or substitute
+2. Use the typical ingredients needed for "${recipeName}" as it would traditionally be made
+3. You may use ANY ingredients from the available list provided above, plus pantry staples: ${ALLOWED_PANTRY_STAPLES.join(', ')}
+4. The generated recipe title must be: "${recipeName}"
 
 Return ONLY a JSON object matching this exact structure:
 {
@@ -306,7 +312,9 @@ Return ONLY a JSON object matching this exact structure:
 Use appropriate categories: "protein", "vegetable", "grain", "dairy", "spice", "other"
 Use appropriate tags from: "Vegan", "Vegetarian", "Gluten-Free", "Dairy-Free", "Quick", "Healthy", "Budget-Friendly", "Comfort Food", "Dinner", "Lunch", "Breakfast"
 Difficulty must be: "Easy", "Medium", or "Hard"
-Generate at least 3-5 ingredients and 3-8 steps.`;
+Generate at least 3-5 ingredients and 3-8 steps.
+
+STRICTLY DO NOT return error placeholders (e.g., {"error": "NO_FOOD_DETECTED"}). Always return a valid recipe JSON object as specified.`;
 
       const response = await fetch(
         `${this.baseURL}/${this.model}:generateContent?key=${this.apiKey}`,
@@ -340,6 +348,15 @@ Generate at least 3-5 ingredients and 3-8 steps.`;
 
       const sanitized = sanitizeJSONResponse(content);
       const parsed = JSON.parse(sanitized);
+
+      // Handle model error responses gracefully
+      if (parsed && parsed.error === 'NO_FOOD_DETECTED') {
+        throw new LLMServiceError(
+          parsed.message || 'Could not generate a recipe from the provided name and ingredients',
+          'NO_FOOD_DETECTED',
+          true
+        );
+      }
 
       console.log('[LLM] Parsed recipe from name:', JSON.stringify(parsed, null, 2));
 

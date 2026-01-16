@@ -160,7 +160,7 @@ export default function SettingsScreen() {
           <Card variant="filled">
             <Body style={styles.aboutVersion}>StockedFridge v1.0.0</Body>
             <Caption style={styles.aboutDescription}>
-              Transform your ingredients into delicious recipes using AI
+              Transform your ingredients into delicious recipes using our assistant
             </Caption>
           </Card>
         </View>
